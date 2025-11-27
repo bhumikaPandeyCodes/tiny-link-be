@@ -1,7 +1,6 @@
 const db = require('../config/db');
 const { nanoid } = require('nanoid');
 
-// Regex from PDF: [A-Za-z0-9]{6,8}
 const CODE_REGEX = /^[A-Za-z0-9]{6,8}$/;
 
 const createLink = async (req, res) => {
@@ -11,13 +10,11 @@ const createLink = async (req, res) => {
 
     let code = shortCode;
 
-    // Validate custom code if provided
     if (code) {
         if (!CODE_REGEX.test(code)) {
             return res.status(400).json({ error: 'Short code must be 6-8 alphanumeric characters.' });
         }
     } else {
-        // Generate unique code (6 chars)
         code = nanoid(6);
     }
 
@@ -61,7 +58,7 @@ const deleteLink = async (req, res) => {
     try {
         const result = await db.query('DELETE FROM links WHERE short_code = $1 RETURNING *', [code]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Link not found' });
-        res.status(204).send(); // No content
+        res.status(204).send();
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -77,7 +74,6 @@ const redirectToOriginal = async (req, res) => {
 
         if (result.rows.length === 0) return res.status(404).json({ error: 'Link not found' });
 
-        // 302 Redirect as requested
         res.redirect(302, result.rows[0].original_url);
     } catch (err) {
         console.error(err);
